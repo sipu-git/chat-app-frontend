@@ -29,7 +29,7 @@ export default function LoginPage() {
   }, [loading, user, router]);
 
   const handleLogin = ()=>{
-    window.location.href = "http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/auth/google/callback";
+    window.location.href = "http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/auth";
   }
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
