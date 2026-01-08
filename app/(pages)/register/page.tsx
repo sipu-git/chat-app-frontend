@@ -57,7 +57,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const response = await api.post(
-        "http://localhost:4000/api/users/register",
+        "/users/register",
         formInfos, {
         headers: { "Content-Type": "mutipart/form-data" }
       });
