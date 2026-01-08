@@ -55,7 +55,7 @@ api.interceptors.response.use(
 
       try {
         const res = await axios.post(
-          "http://localhost:4000/api/users/refresh-token",
+          "http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/users/refresh-token",
           {},
           { withCredentials: true }
         );
