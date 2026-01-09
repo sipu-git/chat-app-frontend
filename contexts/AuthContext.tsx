@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const res = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com/api/users/viewProfile");
+        const res = await axios.get("/api/users/viewProfile");
         setUser(res.data.user);
       } catch (error) {
         localStorage.removeItem("accessToken");
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const res = await axios.post<LoginResponse>("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com/api/users/loginUser", {
+      const res = await axios.post<LoginResponse>("/api/users/loginUser", {
         email,
         password,
       });

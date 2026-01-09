@@ -52,7 +52,7 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
       : null;
 
   useEffect(() => {
-    socket = io("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com", {
+    socket = io("http://13.233.23.20:4000", {
       auth: {
         token: localStorage.getItem("accessToken")
       }
