@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/axios";
+import axios from "axios";
 
 interface RegisterFormProps {
   username: string;
@@ -56,8 +57,8 @@ export default function RegisterPage() {
     
     setLoading(true);
     try {
-      const response = await api.post(
-        "/users/register",
+      const response = await axios.post(
+        "http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com/api/users/register",
         formInfos, {
         headers: { "Content-Type": "mutipart/form-data" }
       });
