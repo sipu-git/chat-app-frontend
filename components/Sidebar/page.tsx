@@ -81,7 +81,7 @@ export default function ChatSidebar({
 
 
   const getSignedImageUrl = async (key: string) => {
-    const res = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com/api/users/view-image", {
+    const res = await api.get("/users/view-image", {
       params: { key },
     });
     return res.data.url as string;
