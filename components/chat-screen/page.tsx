@@ -207,7 +207,7 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
           {user.online ? (
             <span className="text-xs text-[#14fb87]">Online</span>
           ) : (
-            <span className="text-xs text-[#777d78]">
+            <span className="text-xs text-[#949594]">
               Last seen {formatLastSeen(user.lastSeen)}
             </span>
           )}
