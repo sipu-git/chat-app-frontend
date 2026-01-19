@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import api from "@/lib/axios";
-import { User } from "@/types/chat";
+import { Message, User } from "@/types/chat";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenuComponent } from "../ui/drop-down-menu";
 import Image from "next/image";
@@ -10,20 +9,24 @@ import { PlaceholdersAndVanishInput } from "../ui/placeholders-and-vanish-input"
 import Divider from "../ui/divider";
 import { AnimatedThemeToggler } from "../ui/animated-theme-toggler";
 import axios from "axios";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { colorPallate } from "@/styles/colorPallate";
 
-const getLoggedInUserId = () => {
-  if (typeof window === "undefined") return null;
+// const getLoggedInUserId = () => {
+//   if (typeof window === "undefined") return null;
 
-  const token = localStorage.getItem("accessToken");
-  if (!token) return null;
+//   const token = localStorage.getItem("accessToken");
+//   if (!token) return null;
 
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.id as string;
-  } catch {
-    return null;
-  }
-};
+//   try {
+//     const payload = JSON.parse(atob(token.split(".")[1]));
+//     return payload.id as string;
+//   } catch {
+//     return null;
+//   }
+// };
 
 const formatLastSeen = (date?: string) => {
   if (!date) return "";
@@ -76,24 +79,24 @@ export default function ChatSidebar({
   const [searchUsers, setSearchUsers] = useState<User[]>([]);
   const [searchMessages, setSearchMessages] = useState<SearchMessage[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [myId, setMyId] = useState<string | null>(null);
   const [avatarMap, setAvatarMap] = useState<Record<string, string>>({});
+  const [recentChats, setRecentChats] = useState<Record<string, any>>({})
+  const router = useRouter()
 
-
+  const { user } = useAuth()
+  const myId = user?.id ?? null;
   const getSignedImageUrl = async (key: string) => {
-    const res = await api.get("/users/view-image", {
+    const res = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/users/view-image", {
       params: { key },
+      withCredentials: true
     });
     return res.data.url as string;
   };
 
   useEffect(() => {
-    setMyId(getLoggedInUserId());
-  }, []);
-
-  useEffect(() => {
     const fetchUsers = async () => {
-      const res = await api.get("/users/get-users");
+      const res = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/users/get-users", {
+      });
 
       const mapped: User[] = res.data.users.map((u: ApiUser) => ({
         id: u._id,
@@ -137,6 +140,7 @@ export default function ChatSidebar({
 
   const handleSearch = async (query: string) => {
     onSearchChange(query);
+    const token = localStorage.getItem("accessToken");
 
     if (!query.trim()) {
       setIsSearching(false);
@@ -147,8 +151,11 @@ export default function ChatSidebar({
 
     setIsSearching(true);
 
-    const res = await api.get("/chats/searchApi", {
+    const res = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/chats/searchApi", {
       params: { q: query },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     const mappedUsers: User[] = res.data.users.map((u: ApiUser) => ({
@@ -180,88 +187,153 @@ export default function ChatSidebar({
     setAvatarMap((prev) => ({ ...prev, ...urlMap }));
   };
 
+  // recent chat api
+  useEffect(() => {
+    const findRecentChats = async () => {
+      const token = localStorage.getItem("accessToken")
+      try {
+        const response = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/chats/getRecentChats", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const map: Record<string, any> = {};
+        response.data.findChats.forEach((chat: any) => {
+          map[chat.userId] = chat;
+        })
+        setRecentChats(map)
+      } catch (error: any) {
+        console.error(error?.response?.data?.message || "Unable to get the chats");
+      }
+    }
+    findRecentChats()
+  }, [])
+
+  const renderSidebarThicks = (status: Message["status"]) => {
+    if (!status) return null;
+    if (status === "sent") {
+      return <span className="text-xs ml-1">✓</span>;
+    }
+
+    if (status === "delivered") {
+      return <span className="text-xs ml-1 text-[#fffefe]">✓✓</span>;
+    }
+
+    if (status === "seen") {
+      return <span className="text-xs ml-1 text-[#073dff]">✓✓</span>;
+    }
+
+    return null;
+  }
   return (
-    <aside className="w-full lg:w-80 p-2 bg-[radial-gradient(circle,#ffffff,#8f73ab)]
-    dark:bg-[radial-gradient(circle,#0f172a,#020617)]
+    <aside className="w-full lg:w-80  bg-[hsl(156,100%,98%)] dark:bg-[#050404]
     text-zinc-900 dark:text-zinc-100 h-full">
       {/* HEADER */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <Image src="/chat-app.png" alt="logo" width={44} height={44} />
-          <span className="font-semibold">QuickChat</span>
+      <div className="dark:bg-transparent p-2 bg-[hsl(156,100%,98%)]">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Image src="/chat-logo.png" alt="logo" width={30} height={30} />
+            <span className="font-bold text-[#01da58]">QuickChat</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <AnimatedThemeToggler />
+            <DropdownMenuComponent side="bottom" align="end" />
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <AnimatedThemeToggler />
-          <DropdownMenuComponent side="bottom" align="end" />
+
+        {/* SEARCH */}
+        <div className="mt-3">
+          <PlaceholdersAndVanishInput
+            placeholders={["Search users or messages..."]}
+            onChange={(e) => handleSearch(e.target.value)}
+            onSubmit={(e) => e.preventDefault()}
+          />
         </div>
+              <Divider />
+
       </div>
+      <div className="overflow-y-auto hide-scrollbar h-[calc(100vh-180px)]">
+        {/* SEARCH USERS */}
+        {isSearching &&
+          searchUsers.map((user) => (
+            <button
+              key={user.id}
+              onClick={() => handleUserClick(user)}
+              className="w-full flex items-center gap-3 p-3"
+            >
+              <Avatar className="cursor-pointer" onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/view-profile/${user.id}`)
 
-      {/* SEARCH */}
-      <div className="mt-3">
-        <PlaceholdersAndVanishInput
-          placeholders={["Search users or messages..."]}
-          onChange={(e) => handleSearch(e.target.value)}
-          onSubmit={(e) => e.preventDefault()}
-        />
-      </div>
+              }}>
+                <AvatarImage src={avatarMap[user.id] || undefined} />
+                <AvatarFallback>{user.name[0]}</AvatarFallback>
+              </Avatar>
+              <p className="text-sm font-semibold text-[#002914] dark:text-[#e1fff4]">{user.name}</p>
+            </button>
+          ))}
 
-      <Divider />
-
-      {/* SEARCH USERS */}
-      {isSearching &&
-        searchUsers.map((user) => (
-          <button
-            key={user.id}
-            onClick={() => handleUserClick(user)}
-            className="w-full flex items-center gap-3 p-3"
-          >
-            <Avatar>
-              <AvatarImage src={avatarMap[user.id] || undefined} />
-              <AvatarFallback>{user.name[0]}</AvatarFallback>
-            </Avatar>
-            <p className="text-sm">{user.name}</p>
-          </button>
-        ))}
-
-      {!isSearching &&
-        users.map((user) => (
-          <button
-            key={user.id}
-            onClick={() => handleUserClick(user)}
-            className={`
-  w-full rounded-lg mt-4 flex items-center gap-3 p-3
-  transition
-  hover:bg-zinc-100 dark:hover:bg-zinc-800
+        {!isSearching &&
+          users.map((user) => (
+            <button
+              key={user.id}
+              onClick={() => handleUserClick(user)}
+              className={`
+  w-full rounded-lg mt-4 flex items-center gap-4 p-3
+  transition duration-500 ease-in-out
+  hover:bg-[hsl(150,3%,87%)] dark:hover:bg-zinc-800
   ${activeUserId === user.id
-                ? "bg-[#faf6fc] dark:bg-zinc-800"
-                : ""
-              }
+                  ? "bg-[hsl(0,1%,73%)] dark:bg-zinc-800"
+                  : ""
+                }
 `}
 
-          >
-            <Avatar>
-              <AvatarImage src={avatarMap[user.id] || undefined} />
-              <AvatarFallback>{user.name[0]}</AvatarFallback>
-            </Avatar>
+            >
+              <Avatar className="cursor-pointer" onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/view-profile/${user.id}`)
 
-            <div className="text-left">
-              <p className="text-sm font-medium">
-                {user.name}
-                {user.id === myId && (
-                  <span className="text-xs pl-1 text-zinc-500">(You)</span>
-                )}
-              </p>
+              }}>
+                <AvatarImage src={avatarMap[user.id] || undefined} />
+                <AvatarFallback>{user.name[0]}</AvatarFallback>
+              </Avatar>
 
-              {user.online ? (
-                <span className="text-green-600 text-sm">Online</span>
-              ) : (
-                <span className="text-xs text-zinc-500">
-                  Last seen {formatLastSeen(user.lastSeen)}
-                </span>
-              )}
-            </div>
-          </button>
-        ))}
+              <div className="text-left flex flex-col gap-2">
+                <p className="text-sm font-medium text-[#002914] dark:text-[#e1fff4]">
+                  {user.name}
+                  {user.id === myId && (
+
+                    <span className="text-xs pl-1  text-[#002914] dark:text-[#e1fff4]">(You)</span>
+                  )}
+                </p>
+
+                {(() => {
+                  const recentChat = recentChats[user.id];
+
+                  if (recentChat) {
+                    return (
+                      <p className="text-xs text-[#02341b] dark:text-[#8c8d8d] truncate">
+                        {recentChat.mediaType === "image"
+                          ? "📷 Image"
+                          : recentChat.lastMessage}
+                        {renderSidebarThicks(recentChat.status)}
+                      </p>
+                    );
+                  }
+
+                  if (user.online) {
+                    return <span className="text-[#01611e] dark:text-[#27fe93] text-xs">Online</span>;
+                  }
+
+                  return (
+                    <span className="text-xs text-[#007332] dark:text-[#27fe93]">
+                      Last seen {formatLastSeen(user.lastSeen)}
+                    </span>
+                  );
+                })()}
+
+              </div>
+            </button>
+          ))}
+      </div>
     </aside>
   );
 }

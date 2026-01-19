@@ -29,7 +29,7 @@ export function DropdownMenuComponent({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className='bg-transparent'><TextAlignEnd className='text-[#fcfaff]' size={40} /></Button>
+        <Button variant="outline" className='bg-transparent'><TextAlignEnd className='text-[#201f20] dark:text-[#81e994]' size={40} /></Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-56"

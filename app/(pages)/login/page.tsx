@@ -30,7 +30,7 @@ export default function LoginPage() {
 
   const handleLogin = () => {
   window.location.href =
-    "/api/auth/google";
+    "http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/auth/google";
 };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,7 +54,6 @@ export default function LoginPage() {
     }
   };
 
-  /* ================= ICONS ================= */
 
   const UserIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"

@@ -18,9 +18,10 @@ export default function ChatPage() {
     if (!loading && !isAuthenticated) {
       router.replace("/");
     }
-  }, [loading, isAuthenticated, router]);
+  }, [loading, isAuthenticated]);
 
-  if (loading || !isAuthenticated) return null;
+  if (loading) return null;
+  if (!isAuthenticated) return null;
 
   return (
     <main className="h-screen w-full overflow-hidden">

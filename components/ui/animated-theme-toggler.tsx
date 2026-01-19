@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { CloudSun, MoonStar } from "lucide-react"
+import { CloudSun, Moon, MoonStar } from "lucide-react"
 import { flushSync } from "react-dom"
 
 import { cn } from "@/lib/utils"
@@ -74,10 +74,10 @@ export const AnimatedThemeToggler = ({
     <button
       ref={buttonRef}
       onClick={toggleTheme}
-      className={cn(className)}
+      className={`cn(className) p-1.5 cursor-pointer rounded-full bg-[#001709] dark:bg-[#868686]`}
       {...props}
     >
-      {isDark ? <CloudSun /> : <MoonStar />}
+      {isDark ? <CloudSun className="text-[#001910]" /> : <Moon className="text-[#919592]" />}
       <span className="sr-only">Toggle theme</span>
     </button>
   )

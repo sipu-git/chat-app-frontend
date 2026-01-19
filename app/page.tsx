@@ -10,14 +10,14 @@ import Image from "next/image";
 export default function HomePage() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
-
-  useEffect(() => {
+useEffect(() => {
     if (!loading && isAuthenticated) {
       router.replace("/chats/home");
     }
-  }, [loading, isAuthenticated, router]);
-
+  }, [loading, isAuthenticated]);
   if (loading) return null;
+
+  if (isAuthenticated) return null;
 
   return (
     <main className="w-full bg-black absolute inset-0 z-0 flex flex-col justify-center h-screen items-center"
@@ -33,7 +33,7 @@ export default function HomePage() {
         backgroundPosition: "0 0, 0 0, 0 0, 40px 40px, center"
       }}>
       <div className="flex justify-center items-center flex-col gap-3.5 text-center">
-        <Image src="/chat-app.png" alt="chat-logo" width={150} height={150} className="object-scale-down"/>
+        <Image src="/chat-app.png" alt="chat-logo" width={150} height={150} className="object-scale-down" />
         <GradientText colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
           animationSpeed={3}
           showBorder={false}
@@ -41,10 +41,10 @@ export default function HomePage() {
         >
           WELCOME TO QuickChat World
         </GradientText>
-      <p className="text-[#9fe7a1] text-2xl">Stay connected, Anytime</p>
+        <p className="text-[#9fe7a1] text-2xl">Stay connected, Anytime</p>
       </div>
 
-      <AnimatedButton text="Login" onClick={()=>router.push('/login')} className="mt-4"/>
+      <AnimatedButton text="Login" onClick={() => router.push('/login')} className="mt-4" />
     </main>
   );
 }

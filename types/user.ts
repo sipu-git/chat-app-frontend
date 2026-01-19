@@ -3,6 +3,7 @@ export interface User {
   username: string;
   email: string;
   phone: string;
+  description?:string;
   isOnline: boolean;
   profilePic?: string;
   lastSeen?:string;

@@ -20,7 +20,7 @@ export default function ChatMessage({
     if (message.status === "sent") return <span>✓</span>;
     if (message.status === "delivered") return <span>✓✓</span>;
     if (message.status === "seen")
-      return <span className="text-blue-400">✓✓</span>;
+      return <span className="text-[#0432ff] font-bold">✓✓</span>;
 
     return null;
   };
@@ -29,11 +29,11 @@ export default function ChatMessage({
     <motion.div
       initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`max-w-xs p-2 rounded-2xl ${isMine
+      className={`max-w-xs p-2 my-3 rounded-md ${isMine
           ? `
-      ml-auto text-white
-      bg-[linear-gradient(348deg,#c800f0,#cd0bd2,#d115b5)]
-      dark:bg-[linear-gradient(348deg,#7c3aed,#6d28d9,#5b21b6)]
+      ml-auto text-[#002a18]
+      bg-[#e8fef3]
+      dark:bg-[#09fa7e]
     `
           : `
       mr-auto

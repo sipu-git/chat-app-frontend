@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
+import { colorPallate } from "@/styles/colorPallate";
 
 export function PlaceholdersAndVanishInput({
   placeholders,
@@ -24,10 +25,10 @@ export function PlaceholdersAndVanishInput({
   };
   const handleVisibilityChange = () => {
     if (document.visibilityState !== "visible" && intervalRef.current) {
-      clearInterval(intervalRef.current); // Clear the interval when the tab is not visible
+      clearInterval(intervalRef.current);
       intervalRef.current = null;
     } else if (document.visibilityState === "visible") {
-      startAnimation(); // Restart the interval when the tab becomes visible
+      startAnimation(); 
     }
   };
 
@@ -177,8 +178,9 @@ export function PlaceholdersAndVanishInput({
   };
   return (
     <form
+    style={{backgroundColor:colorPallate.primary}}
       className={cn(
-        "w-full relative max-w-3xl mx-auto bg-[rgb(81,11,245,0.2)] dark:bg-zinc-800 h-12 rounded-full overflow-hidden  transition duration-200",
+        "w-full relative max-w-3xl mx-auto dark:bg-[#848484] h-12 rounded-full overflow-hidden  transition duration-200",
         value && "bg-[rgb(81,11,245,0.2)]"
       )}
       onSubmit={handleSubmit}
@@ -202,12 +204,12 @@ export function PlaceholdersAndVanishInput({
         value={value}
         type="text"
         className={cn(
-          "w-full relative text-sm placeholder:text-zinc-50 sm:text-base z-50 border-none dark:text-white bg-transparent text-black h-full rounded-full focus:outline-none focus:ring-0 focus:bg-transparent pl-6",
+          "w-full relative text-sm placeholder:text-white sm:text-base z-50 border-none dark:text-white bg-[rgba(42,2,64,0.6)] text-[#cecdcd] h-full rounded-full focus:outline-none focus:ring-0 focus:bg-[rgba(42,2,64,0.6)] pl-6",
           animating && "text-transparent dark:text-transparent"
         )}
       />
 
-     <p><Search className="text-zinc-200 absolute right-5 bottom-3.5" size={20}/></p>
+     <p><Search className="text-zinc-50 absolute right-5 bottom-3.5" size={20}/></p>
       <div className="absolute inset-0 flex items-center rounded-full pointer-events-none">
         <AnimatePresence mode="wait">
           {!value && (
@@ -229,7 +231,7 @@ export function PlaceholdersAndVanishInput({
                 duration: 0.3,
                 ease: "linear",
               }}
-              className="dark:text-zinc-500 text-sm sm:text-base font-normal text-white pl-6 text-left w-[calc(100%-2rem)] truncate"
+              className="text-[#ffffff] dark:text-zinc-500 text-sm sm:text-base font-normal pl-6 text-left w-[calc(100%-2rem)] truncate"
             >
               {placeholders[currentPlaceholder]}
             </motion.p>

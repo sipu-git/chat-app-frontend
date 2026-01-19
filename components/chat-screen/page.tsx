@@ -7,6 +7,8 @@ import ChatMessage from "./ChatMessage";
 import { ArrowLeft, Plus, Send } from "lucide-react";
 import { io, Socket } from 'socket.io-client';
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 interface ChatScreenProps {
   user: User | null;
@@ -37,12 +39,14 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string>("")
+  // const [avatarUrl, setAvatarUrl] = useState<string>("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const router = useRouter()
 
   const getSignedImageUrl = async (key: string) => {
-    const res = await api.get("/users/view-image", {
-      params: { key },
+    const res = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/users/view-image", {
+      params: { key }, withCredentials: true,
     });
     return res.data.url as string;
   };
@@ -51,8 +55,13 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
       ? localStorage.getItem("userId")
       : null;
 
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("accessToken")
+      : null;
+
   useEffect(() => {
-    socket = io("http://13.233.23.20:4000", {
+    socket = io("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000", {
       auth: {
         token: localStorage.getItem("accessToken")
       }
@@ -79,7 +88,12 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
     const fetchChats = async () => {
       setLoading(true);
       try {
-        const res = await api.get(`/chats/get-chats/${user.id}`);
+        const res = await axios.get(`http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/chats/get-chats/${user.id}`, {
+          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         const normalized: Message[] = res.data.chats.map((chat: any) => ({
           id: chat._id,
@@ -104,99 +118,103 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
   }, [user?.id, myId]);
 
 
-  useEffect(() => {
-    if (!user?.profilePic) {
-      setAvatarUrl("")
-      return;
-    }
-    if (isPublicUrl(user.profilePic)) {
-      setAvatarUrl(user.profilePic)
-    }
-    else {
-      getSignedImageUrl(user.profilePic)
-        .then(setAvatarUrl).catch(() => setAvatarUrl(""))
-    }
-  }, [user?.profilePic])
-
 
   const handleSend = async () => {
-  if ((!inputValue.trim() && !selectedFile) || !user || !myId) return;
+    if ((!inputValue.trim() && !selectedFile) || !user || !myId) return;
 
-  const optimisticMessage: Message = {
-    id: Date.now().toString(),
-    senderId: myId,
-    receiverId: user.id,
-    content: inputValue.trim() || null,
-    mediaType: selectedFile ? "image" : null,
-    createdAt: new Date().toISOString(),
+    const optimisticMessage: Message = {
+      id: Date.now().toString(),
+      senderId: myId,
+      receiverId: user.id,
+      content: inputValue.trim() || null,
+      mediaType: selectedFile ? "image" : null,
+      createdAt: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, optimisticMessage]);
+    setInputValue("");
+    setSelectedFile(null);
+
+    try {
+      const formData = new FormData();
+      if (inputValue.trim()) formData.append("message", inputValue);
+      if (selectedFile) formData.append("image", selectedFile);
+
+      await axios.post(`http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/chats/create-chat/${user.id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+
+      });
+    } catch (error) {
+      console.error("Send message failed:", error);
+    }
   };
 
-  setMessages((prev) => [...prev, optimisticMessage]);
-  setInputValue("");
-  setSelectedFile(null);
+  useEffect(() => {
+    if (!user?.profilePic) {
+      setAvatarUrl(null);
+      return;
+    }
 
-  try {
-    const formData = new FormData();
-    if (inputValue.trim()) formData.append("message", inputValue);
-    if (selectedFile) formData.append("image", selectedFile);
-
-    await api.post(`/chats/create-chat/${user.id}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-  } catch (error) {
-    console.error("Send message failed:", error);
-  }
-};
-
+    (async () => {
+      try {
+        const url = await getSignedImageUrl(user.profilePic || "");
+        setAvatarUrl(url);
+      } catch (err) {
+        console.error("Failed to load avatar:", err);
+      }
+    })();
+  }, [user?.profilePic]);
 
 
   if (!user) {
     return (
       <div className="flex-1 h-full relative flex items-center justify-center text-muted-foreground"
         style={{
-          backgroundImage: `radial-gradient(circle 500px at 50% 300px, rgba(16,185,129,0.35), transparent)`,
+          background: "radial-gradient(125% 125% at 50% 10%, #000000 40%, #350136 100%)",
         }}>
         Select a conversation to start chatting
       </div>
     );
   }
 
-
   return (
     <div className="flex bg-black flex-col flex-1 h-full"
       style={{
-        backgroundImage: `
-         repeating-linear-gradient(45deg, rgba(0, 255, 65, 0.08) 0, rgba(0, 255, 65, 0.08) 1px, transparent 1px, transparent 12px),
-        repeating-linear-gradient(-45deg, rgba(0, 255, 65, 0.08) 0, rgba(0, 255, 65, 0.08) 1px, transparent 1px, transparent 12px),
-        repeating-linear-gradient(90deg, rgba(0, 255, 65, 0.03) 0, rgba(0, 255, 65, 0.03) 1px, transparent 1px, transparent 4px)
-      `,
-        backgroundSize: '24px 24px, 24px 24px, 8px 8px',
+        background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(6, 182, 212, 0.25), transparent 70%), #000000",
       }}>
 
       {/* HEADER */}
-      <div className="flex items-center bg-[rgb(67,55,71,0.5)] dark:bg-[#180f1a] gap-3 p-3">
+      <div className="flex items-center bg-[rgb(67,55,71,0.5)] gap-3 p-3">
         <button onClick={onBack} className="lg:hidden cursor-pointer text-lg">
-          <ArrowLeft />
+          <ArrowLeft className="text-[#e5e6e5] dark:text-[#606060]" />
         </button>
 
-        <Avatar>
-          <AvatarImage src={avatarUrl || undefined} />
-          <AvatarFallback>{user.name[0]}</AvatarFallback>
+        <Avatar className="cursor-pointer" onClick={(e)=>{
+          e.stopPropagation();
+          router.push(`/view-profile/${user.id}`)
+        }}>
+          <AvatarImage src={avatarUrl ?? undefined} />
+          <AvatarFallback>
+            {user?.name?.charAt(0).toUpperCase() ?? "U"}
+          </AvatarFallback>
         </Avatar>
 
         <div>
-          <h2 className="font-semibold text-[#df74ff]">{user.name}</h2>
+          <h2 className="font-semibold text-[#e7fff0]">{user.name}</h2>
           {user.online ? (
-            <span className="text-xs text-zinc-50">Online</span>
+            <span className="text-xs text-[#14fb87]">Online</span>
           ) : (
-            <span className="text-xs text-zinc-50">
+            <span className="text-xs text-[#777d78]">
               Last seen {formatLastSeen(user.lastSeen)}
             </span>
           )}
         </div>
       </div>
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+      <div className="flex-1 overflow-y-auto hide-scrollbar p-4 space-y-2">
         {loading && (
           <p className="text-center text-sm text-muted-foreground">
             Loading messages...
@@ -218,7 +236,7 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
         ))}
       </div>
 
-      <div className="p-4  flex gap-2">
+      <div className="p-4 border-t border-[#363636] flex gap-2">
         <label className="cursor-pointer p-3 rounded-full bg-white text-zinc-600 flex items-center justify-center">
           <Plus />
           <input
@@ -249,7 +267,7 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
           type='submit'
           onClick={handleSend}
           disabled={!inputValue.trim()}
-          className="p-3 rounded-full bg-[#7B17DF] text-white disabled:opacity-50"
+          className="p-3 rounded-full bg-[#037337] text-white disabled:opacity-50"
         >
           <Send />
         </button>

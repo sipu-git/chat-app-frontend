@@ -12,6 +12,7 @@ interface RegisterFormProps {
   username: string;
   email: string;
   phone: string;
+  description:string;
   password: string;
   confirmPassword?: string;
 }
@@ -26,11 +27,12 @@ export default function RegisterPage() {
     username: "",
     email: "",
     phone: "",
+    description:"",
     password: "",
     confirmPassword: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -44,6 +46,7 @@ export default function RegisterPage() {
     formInfos.append("username", formData.username)
     formInfos.append("email", formData.email)
     formInfos.append("phone", formData.phone)
+    formInfos.append("description", formData.description)
     formInfos.append("password", formData.password)
 
     if (file) {
@@ -58,10 +61,14 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const response = await axios.post(
-        "/api/users/register",
-        formInfos, {
-        headers: { "Content-Type": "mutipart/form-data" }
-      });
+        "http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/users/register",
+        formInfos,
+         {
+        headers: { "Content-Type": "mutipart/form-data" },
+        withCredentials:true
+      },
+        
+    );
 
       if (response.status === 201) {
         toast.success(response.data.message || "Registration successful! Redirecting to login...");
@@ -69,6 +76,7 @@ export default function RegisterPage() {
           username: "",
           email: "",
           phone: "",
+          description:"",
           password: "",
           confirmPassword: "",
         });
@@ -87,6 +95,7 @@ export default function RegisterPage() {
       setFormData({
         username:"",
         email:"",
+        description:"",
         phone:"",
         password:"",
       })
@@ -240,7 +249,21 @@ export default function RegisterPage() {
                 </div>
               </div>
             </div>
+            
           </div>
+          <div className="">
+              <label className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                  Description (Optional)
+                </label>
+                <textarea
+                  rows={4}
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Add description"
+                  className="w-full p-2 rounded-md border bg-white dark:bg-zinc-950 text-sm focus-visible:ring-1"
+                />
+            </div>
           {/* Submit */}
          <div className="w-full flex justify-center gap-4">
            <button
