@@ -204,7 +204,7 @@ export function PlaceholdersAndVanishInput({
         value={value}
         type="text"
         className={cn(
-          "w-full relative text-sm placeholder:text-white sm:text-base z-50 border-none dark:text-white bg-[rgba(42,2,64,0.6)] text-[#cecdcd] h-full rounded-full focus:outline-none focus:ring-0 focus:bg-[rgba(42,2,64,0.6)] pl-6",
+          "w-full relative text-sm placeholder:text-white sm:text-base z-50 border-none dark:text-white bg-[rgba(44,45,45,0.6)] text-[#cecdcd] h-full rounded-full focus:outline-none focus:ring-0 focus:bg-[rgba(52,52,52,0.6)] pl-6",
           animating && "text-transparent dark:text-transparent"
         )}
       />
@@ -231,7 +231,7 @@ export function PlaceholdersAndVanishInput({
                 duration: 0.3,
                 ease: "linear",
               }}
-              className="text-[#ffffff] dark:text-zinc-500 text-sm sm:text-base font-normal pl-6 text-left w-[calc(100%-2rem)] truncate"
+              className="text-[#ffffff] dark:text-white text-sm sm:text-base font-normal pl-6 text-left w-[calc(100%-2rem)] truncate"
             >
               {placeholders[currentPlaceholder]}
             </motion.p>

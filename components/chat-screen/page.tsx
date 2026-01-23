@@ -45,7 +45,7 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
   const router = useRouter()
 
   const getSignedImageUrl = async (key: string) => {
-    const res = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/users/view-image", {
+    const res = await axios.get("http://ec2-13-127-211-135.ap-south-1.compute.amazonaws.com:4000/api/users/view-image", {
       params: { key }, withCredentials: true,
     });
     return res.data.url as string;
@@ -61,7 +61,7 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
       : null;
 
   useEffect(() => {
-    socket = io("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000", {
+    socket = io("http://ec2-13-127-211-135.ap-south-1.compute.amazonaws.com:4000", {
       auth: {
         token: localStorage.getItem("accessToken")
       }
@@ -88,7 +88,7 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
     const fetchChats = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/chats/get-chats/${user.id}`, {
+        const res = await axios.get(`http://ec2-13-127-211-135.ap-south-1.compute.amazonaws.com:4000/api/chats/get-chats/${user.id}`, {
           withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
@@ -173,12 +173,18 @@ export default function ChatScreen({ user, onBack }: ChatScreenProps) {
     return (
       <div className="flex-1 h-full relative flex items-center justify-center text-muted-foreground"
         style={{
-          background: "radial-gradient(125% 125% at 50% 10%, #000000 40%, #350136 100%)",
-        }}>
+      backgroundImage: `
+        repeating-linear-gradient(22.5deg, transparent, transparent 2px, rgba(75, 85, 99, 0.06) 2px, rgba(75, 85, 99, 0.06) 3px, transparent 3px, transparent 8px),
+        repeating-linear-gradient(67.5deg, transparent, transparent 2px, rgba(107, 114, 128, 0.05) 2px, rgba(107, 114, 128, 0.05) 3px, transparent 3px, transparent 8px),
+        repeating-linear-gradient(112.5deg, transparent, transparent 2px, rgba(55, 65, 81, 0.04) 2px, rgba(55, 65, 81, 0.04) 3px, transparent 3px, transparent 8px),
+        repeating-linear-gradient(157.5deg, transparent, transparent 2px, rgba(31, 41, 55, 0.03) 2px, rgba(31, 41, 55, 0.03) 3px, transparent 3px, transparent 8px)
+      `,
+    }}>
         Select a conversation to start chatting
       </div>
     );
   }
+  
 
   return (
     <div className="flex bg-black flex-col flex-1 h-full"

@@ -86,7 +86,7 @@ export default function ChatSidebar({
   const { user } = useAuth()
   const myId = user?.id ?? null;
   const getSignedImageUrl = async (key: string) => {
-    const res = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/users/view-image", {
+    const res = await axios.get("http://ec2-13-127-211-135.ap-south-1.compute.amazonaws.com:4000/api/users/view-image", {
       params: { key },
       withCredentials: true
     });
@@ -95,7 +95,7 @@ export default function ChatSidebar({
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const res = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/users/get-users", {
+      const res = await axios.get("http://ec2-13-127-211-135.ap-south-1.compute.amazonaws.com:4000/api/users/get-users", {
       });
 
       const mapped: User[] = res.data.users.map((u: ApiUser) => ({
@@ -151,7 +151,7 @@ export default function ChatSidebar({
 
     setIsSearching(true);
 
-    const res = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/chats/searchApi", {
+    const res = await axios.get("http://ec2-13-127-211-135.ap-south-1.compute.amazonaws.com:4000/api/chats/searchApi", {
       params: { q: query },
       headers: {
         Authorization: `Bearer ${token}`,
@@ -192,7 +192,7 @@ export default function ChatSidebar({
     const findRecentChats = async () => {
       const token = localStorage.getItem("accessToken")
       try {
-        const response = await axios.get("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/chats/getRecentChats", {
+        const response = await axios.get("http://ec2-13-127-211-135.ap-south-1.compute.amazonaws.com:4000/api/chats/getRecentChats", {
           headers: { Authorization: `Bearer ${token}` },
         })
         const map: Record<string, any> = {};

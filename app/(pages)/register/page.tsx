@@ -61,7 +61,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/users/register",
+        "http://ec2-13-127-211-135.ap-south-1.compute.amazonaws.com:4000/api/users/register",
         formInfos,
          {
         headers: { "Content-Type": "mutipart/form-data" },

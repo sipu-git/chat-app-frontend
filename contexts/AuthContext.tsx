@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const res = await axios.post<LoginResponse>("http://ec2-13-233-23-20.ap-south-1.compute.amazonaws.com:4000/api/users/loginUser", {
+      const res = await axios.post<LoginResponse>("http://ec2-13-127-211-135.ap-south-1.compute.amazonaws.com:4000/api/users/loginUser", {
         email,
         password,
       });
